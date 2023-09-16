@@ -65,7 +65,7 @@ const TableRow = ({ user }: { user: User }) => {
 
   const verifyHandler = async () => {
     try {
-      await axios.post(`${process.env.API_URL}/user/verify/accept`, {
+      await axios.post(`${process.env.API_URL}/api/v1/user/verify/accept`, {
         id: user.id,
       });
       user.is_verified = true;

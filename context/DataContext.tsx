@@ -33,13 +33,12 @@ export const DataContextProvider = ({
   const [users, setUsers] = useState<User[]>([]);
 
   async function getUserData() {
-    const res = await axios.get(`${process.env.API_URL}/user/all`);
+    const res = await axios.get(`${process.env.API_URL}/api/v1/user/all`);
     setUsers(res.data.data);
   }
 
   useEffect(() => {
     getUserData();
-    console.log(process.env.API_URL);
   }, []);
 
   const dataContextValue: DataContextState = {
