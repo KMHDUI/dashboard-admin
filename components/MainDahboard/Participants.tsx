@@ -177,18 +177,16 @@ const TableRow = ({ user }: { user: User }) => {
         </div>
         <ModalFooter>
           <Stack direction="row" spacing={4} align="center">
-            {!user.is_verified ||
-              user.snUrl ||
-              (user.haloBelanjaUrl && (
-                <Button
-                  colorScheme="facebook"
-                  variant="outline"
-                  onClick={verifyHandler}
-                  disabled={true}
-                >
-                  Verify
-                </Button>
-              ))}
+            {!user.is_verified && (user.snUrl || user.haloBelanjaUrl) && (
+              <Button
+                colorScheme="facebook"
+                variant="outline"
+                onClick={verifyHandler}
+                disabled={true}
+              >
+                Verify
+              </Button>
+            )}
             <Button onClick={onClose}>Close</Button>
           </Stack>
         </ModalFooter>
