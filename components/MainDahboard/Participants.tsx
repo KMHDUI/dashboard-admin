@@ -47,7 +47,7 @@ const Participants = () => {
           </Tbody>
           <Tfoot>
             <Tr>
-              <Th>Id</Th>
+              <Th className="text-center">Id</Th>
               <Th>Name</Th>
               <Th>Email</Th>
               <Th>University</Th>
