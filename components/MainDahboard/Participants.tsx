@@ -6,6 +6,7 @@ import {
   Button,
   Image,
   ModalFooter,
+  Select,
   Stack,
   Table,
   TableCaption,
@@ -20,16 +21,71 @@ import {
 } from "@chakra-ui/react";
 import AppModal from "../Modal/AppModal";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 const Participants = () => {
   const { users } = useDataContext() as DataContextState;
+  const [filteredUser, setFilteredUser] = useState<User[]>(users);
+  const [filter, setFilter] = useState<"all" | "not_verified" | "verified">(
+    "all"
+  );
+
+  useEffect(() => {
+    const data = users.filter((user) => {
+      if (filter === "not_verified") {
+        return user.is_verified;
+      } else if (filter === "verified") {
+        return !user.is_verified;
+      }
+
+      return user;
+    });
+    setFilteredUser(data);
+  }, [users, filter]);
+
+  const getStatistic = () => {
+    const total = users.length;
+    let isVerified = 0;
+    for (const user of users) {
+      if (user.is_verified) {
+        isVerified += 1;
+      }
+    }
+    return (
+      <>
+        <span className="text-black">{`${isVerified}/${total}`}</span> users is
+        verified by system
+      </>
+    );
+  };
   return (
     <div>
-      <div className="text-black text-[1.8em] text-center mb-8">
+      <div className="text-black text-[1.9em] text-center">
         {State.PARTICIPANTS}
       </div>
+      <div className="mb-8 text-bold text-center">{getStatistic()}</div>
+      <Stack className="max-w-[300px] mb-8">
+        <div className="flex flex-col gap-2 cursor-pointer text-black">
+          <Select
+            id="filter"
+            size={"md"}
+            variant={"filled"}
+            placeholder="Filter By"
+            colorScheme="facebook"
+            onChange={(e) => {
+              setFilter(
+                e.currentTarget.value as "all" | "not_verified" | "verified"
+              );
+            }}
+          >
+            <option value="all">All</option>
+            <option value="not_verified">Verified</option>
+            <option value="verified">Not Verified</option>
+          </Select>
+        </div>
+      </Stack>
       <TableContainer>
-        <Table variant="striped" colorScheme="teal">
+        <Table variant="simple" colorScheme="teal">
           <TableCaption>{State.PARTICIPANTS}</TableCaption>
           <Thead>
             <Tr>
@@ -41,7 +97,7 @@ const Participants = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {users.map((user, id) => {
+            {filteredUser.map((user, id) => {
               return <TableRow key={id} user={user} />;
             })}
           </Tbody>

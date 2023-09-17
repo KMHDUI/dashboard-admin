@@ -2,11 +2,15 @@
 import { DataContextState, State, useDataContext } from "@/context/DataContext";
 import React from "react";
 import Participants from "./Participants";
+import Registraion from "./Registration";
 
 const MainDashboard = () => {
   const { state } = useDataContext() as DataContextState;
   return (
-    <Container>{state === State.PARTICIPANTS && <Participants />}</Container>
+    <Container>
+      {state === State.PARTICIPANTS && <Participants />}
+      {state === State.REGISTRATION && <Registraion />}
+    </Container>
   );
 };
 

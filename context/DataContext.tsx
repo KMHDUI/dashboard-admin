@@ -1,4 +1,4 @@
-import { User } from "@/types/types";
+import { Registration, User } from "@/types/types";
 import axios from "axios";
 import {
   Dispatch,
@@ -20,6 +20,7 @@ export interface DataContextState {
   setState: Dispatch<SetStateAction<string>>;
   state: string;
   users: User[];
+  registrations: Registration[];
 }
 
 export const DataContext = createContext<DataContextState | null>(null);
@@ -31,20 +32,30 @@ export const DataContextProvider = ({
 }: React.PropsWithChildren<{}>) => {
   const [state, setState] = useState(State.PARTICIPANTS);
   const [users, setUsers] = useState<User[]>([]);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
 
   async function getUserData() {
     const res = await axios.get(`${process.env.API_URL}/api/v1/user/all`);
     setUsers(res.data.data);
   }
 
+  async function getResgitrationData() {
+    const res = await axios.get(
+      `${process.env.API_URL}/api/v1/competition/all`
+    );
+    setRegistrations(res.data.data);
+  }
+
   useEffect(() => {
     getUserData();
+    getResgitrationData();
   }, []);
 
   const dataContextValue: DataContextState = {
     users,
     state,
     setState,
+    registrations,
   };
 
   return (
