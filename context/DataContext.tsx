@@ -21,6 +21,8 @@ export interface DataContextState {
   state: string;
   users: User[];
   registrations: Registration[];
+  getUserData: () => void;
+  getResgitrationData: () => void;
 }
 
 export const DataContext = createContext<DataContextState | null>(null);
@@ -56,6 +58,8 @@ export const DataContextProvider = ({
     state,
     setState,
     registrations,
+    getUserData,
+    getResgitrationData,
   };
 
   return (

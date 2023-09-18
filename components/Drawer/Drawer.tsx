@@ -33,12 +33,6 @@ const AppDrawer = ({
             <List id={State.REGISTRATION} onClick={subMenuClick}>
               Registration
             </List>
-            <List id={State.PAYMENT} onClick={subMenuClick}>
-              Payment
-            </List>
-            <List id={State.SUBMISSION} onClick={subMenuClick}>
-              Submission
-            </List>
           </ul>
         </DrawerBody>
       </DrawerContent>

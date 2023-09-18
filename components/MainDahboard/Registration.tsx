@@ -1,11 +1,17 @@
 "use client";
 
 import { DataContextState, State, useDataContext } from "@/context/DataContext";
-import { Registration, User } from "@/types/types";
+import { Registration } from "@/types/types";
 import {
   Button,
-  Image,
   ModalFooter,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
   Select,
   Stack,
   Table,
@@ -20,8 +26,10 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import AppModal from "../Modal/AppModal";
-import axios from "axios";
 import { useEffect, useState } from "react";
+import { SettingsIcon } from "@chakra-ui/icons";
+import axios from "axios";
+import formatCurrency from "@/utils/formatCurrency";
 
 const Registraion = () => {
   const { registrations } = useDataContext() as DataContextState;
@@ -48,32 +56,17 @@ const Registraion = () => {
     setFilteredRegistrations(data);
   }, [registrations, filter]);
 
-  //   const getStatistic = () => {
-  //     const total = registrations.length;
-  //     for (const registration of registrations) {
-
-  //     }
-  //     return (
-  //       <>
-  //         <span className="text-black">{`${isVerified}/${total}`}</span> users is
-  //         verified by system
-  //       </>
-  //     );
-  //   };
-
   return (
     <div>
       <div className="text-black text-[1.9em] text-center">
         {State.REGISTRATION}
       </div>
-      {/* <div className="mb-8 text-bold text-center">{getStatistic()}</div> */}
       <Stack className="max-w-[300px] mb-8">
         <div className="flex flex-col gap-2 cursor-pointer text-black">
           <Select
             id="filter"
             size={"md"}
             variant={"filled"}
-            placeholder="Filter By"
             colorScheme="facebook"
             onChange={(e) => {
               setFilter(
@@ -95,17 +88,17 @@ const Registraion = () => {
         </div>
       </Stack>
       <TableContainer>
-        <Table variant="simple" colorScheme="teal">
+        <Table variant="simple">
           <TableCaption>{State.REGISTRATION}</TableCaption>
           <Thead>
             <Tr>
               <Th className="text-center">Registration Id</Th>
               <Th>Competition Name</Th>
               <Th>User Fullname</Th>
-              <Th>User Email</Th>
-              <Th>User College</Th>
-              <Th className="text-center">Submission</Th>
+              <Th className="text-center">Total Payment</Th>
               <Th className="text-center">Payment Status</Th>
+              <Th className="text-center">Submission Status</Th>
+              <Th className="text-center">Action</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -118,10 +111,10 @@ const Registraion = () => {
               <Th className="text-center">Registration Id</Th>
               <Th>Competition Name</Th>
               <Th>User Fullname</Th>
-              <Th>User Email</Th>
-              <Th>User College</Th>
-              <Th className="text-center">Submission</Th>
               <Th className="text-center">Payment Status</Th>
+              <Th className="text-center">Payment Status</Th>
+              <Th className="text-center">Submission Status</Th>
+              <Th className="text-center">Action</Th>
             </Tr>
           </Tfoot>
         </Table>
@@ -132,6 +125,16 @@ const Registraion = () => {
 
 const TableRow = ({ registration }: { registration: Registration }) => {
   const { onClose, onOpen, isOpen } = useDisclosure();
+  const { getResgitrationData } = useDataContext() as DataContextState;
+  const verifyPaymentHandler = async (status: 0 | 1) => {
+    try {
+      await axios.post(`${process.env.API_URL}/api/v1/payment/verify`, {
+        billId: registration.bill.id,
+        status: status,
+      });
+      getResgitrationData();
+    } catch (error) {}
+  };
   return (
     <>
       <Tr className="cursor-pointer" onClick={onOpen}>
@@ -140,40 +143,124 @@ const TableRow = ({ registration }: { registration: Registration }) => {
         </Td>
         <Td>{registration.competition_name}</Td>
         <Td>{registration.user_fullname}</Td>
-        <Td>{registration.user_email}</Td>
-        <Td>{registration.user_college}</Td>
         <Td className="text-center">
+          {formatCurrency(registration.bill.bill_total)}
+        </Td>
+        <Td
+          className={`text-center text-[0.8rem] font-bold ${
+            registration.payment_status === "Not Paid"
+              ? "text-[#ED4337]"
+              : registration.payment_status === "Pending"
+              ? "text-[#FFA500]"
+              : "text-[#198754]"
+          }`}
+        >
+          {registration.payment_status}
+        </Td>
+        <Td className="text-center text-[0.8rem] font-black">
+          <span></span>
           {!registration.submission_status ? (
-            "-"
-          ) : registration.submission_status === "Submitted" ? (
-            <a
-              className="font-bold text-[#4F709C]"
-              target="_blank"
-              href={registration.url}
-              onClick={onClose}
-            >
-              Link
-            </a>
+            ""
           ) : (
-            "None"
+            <span
+              className={`${
+                registration.submission_status === "Submitted"
+                  ? "text-[#198754]"
+                  : "text-[#ED4337]"
+              }`}
+            >
+              {registration.submission_status}
+            </span>
           )}
         </Td>
-        <Td className="text-center text-[0.8rem] font-bold">
-          <div className="w-full flex justify-center">
-            {registration.payment_status === "Accepted" ? (
-              <div className=" w-fit rounded-md bg-[#198754] text-white p-2">
-                {registration.payment_status}
-              </div>
-            ) : (
-              <div className="w-fit rounded-md bg-[#ED4337] text-white p-2">
-                {registration.payment_status}
-              </div>
-            )}
-          </div>
+        <Td className="flex justify-center">
+          <Popover placement="auto-end">
+            <PopoverTrigger>
+              <SettingsIcon
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <PopoverHeader fontWeight="semibold">Action</PopoverHeader>
+              <PopoverArrow />
+              <PopoverCloseButton />
+              <PopoverBody>
+                <Stack className="fit-content flex flex-col items-center justify-center gap-2 text-[#fff] font-black text-[0.8rem]">
+                  <a
+                    href={registration.url}
+                    target="_blank"
+                    className={`${
+                      !registration.url && "cursor-not-allowed"
+                    } rounded-md p-2 bg-[#3085C3]`}
+                    onClick={(e) => {
+                      if (!registration.url) e.preventDefault();
+                    }}
+                  >
+                    View Submission
+                  </a>
+                  <a
+                    href={
+                      registration.payment.image_url ??
+                      "https://static.vecteezy.com/system/resources/previews/005/337/799/original/icon-image-not-found-free-vector.jpg"
+                    }
+                    target="_blank"
+                    className={`${
+                      registration.payment_status !== "Pending" &&
+                      "cursor-not-allowed"
+                    } rounded-md p-2 bg-[#35A29F]`}
+                    onClick={(e) => {
+                      if (registration.payment_status !== "Pending")
+                        e.preventDefault();
+                    }}
+                  >
+                    View Transfer Receipt
+                  </a>
+                  <a
+                    target="_blank"
+                    className={`${
+                      registration.payment_status !== "Pending" &&
+                      "cursor-not-allowed"
+                    } rounded-md p-2 bg-[#198754]`}
+                    onClick={(e) => {
+                      if (registration.payment_status !== "Pending") {
+                        e.preventDefault();
+                        return;
+                      }
+                      verifyPaymentHandler(1);
+                    }}
+                  >
+                    Accept Payment
+                  </a>
+                  <a
+                    target="_blank"
+                    className={`${
+                      registration.payment_status !== "Pending" &&
+                      "cursor-not-allowed"
+                    } rounded-md p-2 bg-[#ED4337]`}
+                    onClick={(e) => {
+                      if (registration.payment_status !== "Pending") {
+                        e.preventDefault();
+                        return;
+                      }
+                      verifyPaymentHandler(0);
+                    }}
+                  >
+                    Reject Payment
+                  </a>
+                </Stack>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Td>
       </Tr>
       <AppModal
-        appSize={"full"}
+        appSize="2xl"
         onClose={onClose}
         isOpen={isOpen}
         title="Partisipan Data"
@@ -194,7 +281,7 @@ const TableRow = ({ registration }: { registration: Registration }) => {
                   <Td>Competition Type</Td>
                   <Td>{registration.competition_type}</Td>
                 </Tr>
-                <Tr>
+                <Tr className="">
                   <Td>Is Using Submission</Td>
                   <Td>
                     {registration.competition_using_submission
@@ -234,20 +321,6 @@ const TableRow = ({ registration }: { registration: Registration }) => {
                     </Td>
                   </Tr>
                 )}
-                <Tr>
-                  {registration.competition_using_submission &&
-                    registration.submission_status === "Submitted" && (
-                      <>
-                        <Td>Submission</Td>
-                        <Td>
-                          <embed
-                            src={registration.url}
-                            className="w-full aspect-[2/3]"
-                          />
-                        </Td>
-                      </>
-                    )}
-                </Tr>
               </Tbody>
             </Table>
           </TableContainer>

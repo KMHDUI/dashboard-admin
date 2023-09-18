@@ -8,6 +8,7 @@ export interface User {
   updated_at: string;
   created_at: string;
   is_verified: boolean;
+  is_blocked: boolean;
   college: string;
   batch?: number;
   bod?: string;
@@ -31,6 +32,20 @@ export interface Registration {
   submission_status?: string;
   url?: string;
   member: Member[];
+  bill: Bill;
+  payment: Payment;
+}
+
+export interface Payment {
+  id: string;
+  image_url: string;
+  status: string;
+}
+
+export interface Bill {
+  id: string;
+  bill_total: number;
+  status: string;
 }
 
 export interface Member {

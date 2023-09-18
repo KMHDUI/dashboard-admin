@@ -26,19 +26,21 @@ import { useEffect, useState } from "react";
 const Participants = () => {
   const { users } = useDataContext() as DataContextState;
   const [filteredUser, setFilteredUser] = useState<User[]>(users);
-  const [filter, setFilter] = useState<"all" | "not_verified" | "verified">(
-    "all"
-  );
+  const [filter, setFilter] = useState<
+    "all" | "not_verified" | "verified" | "blocked"
+  >("all");
 
   useEffect(() => {
     const data = users.filter((user) => {
       if (filter === "not_verified") {
-        return user.is_verified;
+        return user.is_verified && !user.is_blocked;
       } else if (filter === "verified") {
-        return !user.is_verified;
+        return !user.is_verified && !user.is_blocked;
+      } else if (filter === "blocked") {
+        return user.is_blocked;
       }
 
-      return user;
+      return !user.is_blocked;
     });
     setFilteredUser(data);
   }, [users, filter]);
@@ -70,17 +72,21 @@ const Participants = () => {
             id="filter"
             size={"md"}
             variant={"filled"}
-            placeholder="Filter By"
             colorScheme="facebook"
             onChange={(e) => {
               setFilter(
-                e.currentTarget.value as "all" | "not_verified" | "verified"
+                e.currentTarget.value as
+                  | "all"
+                  | "not_verified"
+                  | "verified"
+                  | "blocked"
               );
             }}
           >
             <option value="all">All</option>
             <option value="not_verified">Verified</option>
             <option value="verified">Not Verified</option>
+            <option value="blocked">Blocked</option>
           </Select>
         </div>
       </Stack>
@@ -118,13 +124,18 @@ const Participants = () => {
 
 const TableRow = ({ user }: { user: User }) => {
   const { onClose, onOpen, isOpen } = useDisclosure();
+  const { getUserData, getResgitrationData } =
+    useDataContext() as DataContextState;
 
-  const verifyHandler = async () => {
+  const verifyHandler = async (status: 0 | 1 | 2 | 3) => {
     try {
-      await axios.post(`${process.env.API_URL}/api/v1/user/verify/accept`, {
+      await axios.post(`${process.env.API_URL}/api/v1/user/verify`, {
         id: user.id,
+        status: status,
       });
-      user.is_verified = true;
+
+      getUserData();
+      getResgitrationData();
     } catch (error) {}
     onClose();
   };
@@ -137,16 +148,14 @@ const TableRow = ({ user }: { user: User }) => {
         <Td>{user.fullname}</Td>
         <Td>{user.email}</Td>
         <Td>{user.college}</Td>
-        <Td className="text-center text-[0.8rem] font-bold">
+        <Td className="text-center text-[0.8em] font-black font-bold">
           <div className="w-full flex justify-center">
-            {user.is_verified ? (
-              <div className=" w-fit rounded-md bg-[#198754] text-white p-2">
-                Verified
-              </div>
+            {user.is_blocked ? (
+              <div className=" w-fit text-[#383838] p-2">Blocked</div>
+            ) : user.is_verified ? (
+              <div className=" w-fit text-[#198754] p-2">Verified</div>
             ) : (
-              <div className="w-fit rounded-md bg-[#ED4337] text-white p-2">
-                Not Verified
-              </div>
+              <div className="w-fit text-[#ED4337] p-2">Not Verified</div>
             )}
           </div>
         </Td>
@@ -233,17 +242,61 @@ const TableRow = ({ user }: { user: User }) => {
         </div>
         <ModalFooter>
           <Stack direction="row" spacing={4} align="center">
-            {!user.is_verified && (user.snUrl || user.haloBelanjaUrl) && (
+            {!user.is_verified &&
+              !user.is_blocked &&
+              (user.snUrl || user.haloBelanjaUrl) && (
+                <Button
+                  colorScheme="facebook"
+                  variant="outline"
+                  onClick={() => {
+                    verifyHandler(1);
+                  }}
+                  disabled={true}
+                >
+                  Verify
+                </Button>
+              )}
+            {user.is_verified &&
+              !user.is_blocked &&
+              (user.snUrl || user.haloBelanjaUrl) && (
+                <Button
+                  colorScheme="red"
+                  variant="outline"
+                  onClick={() => {
+                    verifyHandler(0);
+                  }}
+                  disabled={true}
+                >
+                  Undo Verification
+                </Button>
+              )}
+            {user.is_blocked && (
               <Button
-                colorScheme="facebook"
+                colorScheme="whatsapp"
                 variant="outline"
-                onClick={verifyHandler}
+                onClick={() => {
+                  verifyHandler(3);
+                }}
                 disabled={true}
               >
-                Verify
+                Unblock
               </Button>
             )}
-            <Button onClick={onClose}>Close</Button>
+            {!user.is_blocked && (
+              <Button
+                colorScheme="orange"
+                variant="outline"
+                onClick={() => {
+                  verifyHandler(2);
+                }}
+                disabled={true}
+              >
+                Block
+              </Button>
+            )}
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
           </Stack>
         </ModalFooter>
       </AppModal>
