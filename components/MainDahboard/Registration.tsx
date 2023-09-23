@@ -211,11 +211,11 @@ const TableRow = ({ registration }: { registration: Registration }) => {
                     }
                     target="_blank"
                     className={`${
-                      registration.payment_status !== "Pending" &&
+                      registration.payment_status === "Not Paid" &&
                       "cursor-not-allowed"
                     } rounded-md p-2 bg-[#35A29F]`}
                     onClick={(e) => {
-                      if (registration.payment_status !== "Pending")
+                      if (registration.payment_status === "Not Paid")
                         e.preventDefault();
                     }}
                   >
