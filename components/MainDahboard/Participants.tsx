@@ -46,12 +46,17 @@ const Participants = () => {
   }, [users, filter]);
 
   const getStatistic = () => {
-    const total = users.length;
+    let total = 0;
     let isVerified = 0;
     for (const user of users) {
+      if (user.is_blocked) {
+        continue;
+      }
+
       if (user.is_verified) {
         isVerified += 1;
       }
+      total += 1;
     }
     return (
       <>
