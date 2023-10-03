@@ -1,0 +1,20 @@
+# Ignore common development and Git-related files
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore build and cache directories
+.next
+out
+build
+.cache
+
+# Ignore any other files or directories you don't want in the Docker image
+# For example, you can add your own custom build artifacts or temporary files here
