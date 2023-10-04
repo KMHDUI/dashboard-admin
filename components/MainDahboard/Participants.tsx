@@ -247,34 +247,30 @@ const TableRow = ({ user }: { user: User }) => {
         </div>
         <ModalFooter>
           <Stack direction="row" spacing={4} align="center">
-            {!user.is_verified &&
-              !user.is_blocked &&
-              (user.snUrl || user.haloBelanjaUrl) && (
-                <Button
-                  colorScheme="facebook"
-                  variant="outline"
-                  onClick={() => {
-                    verifyHandler(1);
-                  }}
-                  disabled={true}
-                >
-                  Verify
-                </Button>
-              )}
-            {user.is_verified &&
-              !user.is_blocked &&
-              (user.snUrl || user.haloBelanjaUrl) && (
-                <Button
-                  colorScheme="red"
-                  variant="outline"
-                  onClick={() => {
-                    verifyHandler(0);
-                  }}
-                  disabled={true}
-                >
-                  Undo Verification
-                </Button>
-              )}
+            {!user.is_verified && !user.is_blocked && (
+              <Button
+                colorScheme="facebook"
+                variant="outline"
+                onClick={() => {
+                  verifyHandler(1);
+                }}
+                disabled={true}
+              >
+                Verify
+              </Button>
+            )}
+            {user.is_verified && !user.is_blocked && (
+              <Button
+                colorScheme="red"
+                variant="outline"
+                onClick={() => {
+                  verifyHandler(0);
+                }}
+                disabled={true}
+              >
+                Undo Verification
+              </Button>
+            )}
             {user.is_blocked && (
               <Button
                 colorScheme="whatsapp"
